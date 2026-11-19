@@ -1,37 +1,12 @@
-/* Neon Coast Cover Studio — dark neon editor UI. */
-html, body { margin: 0; min-height: 100%; background: #0d0618; color: #f4eefc; font: 15px/1.45 system-ui, sans-serif; }
-.app { display: flex; gap: 28px; align-items: flex-start; justify-content: center; padding: 24px; box-sizing: border-box; }
-.controls { display: flex; flex-direction: column; gap: 14px; width: 300px; flex: none; }
-.controls h1 { margin: 0; font-size: 30px; letter-spacing: 2px; color: #ffd319; text-shadow: 0 0 18px rgba(255, 46, 136, 0.65); }
-.tagline { margin: 0; color: #c9b8e8; font-size: 13px; }
-fieldset { border: 1px solid #3a2358; border-radius: 10px; padding: 10px 12px; margin: 0; }
-legend { color: #ff5ca8; font-weight: 700; font-size: 13px; padding: 0 6px; }
-label { display: flex; flex-direction: column; gap: 5px; font-weight: 600; font-size: 13px; margin: 6px 0; }
-input[type=text] { font: inherit; padding: 8px; border: 1px solid #5b3a86; border-radius: 6px; background: #1a0f2e; color: #fff; }
-input[type=file] { font: inherit; font-size: 12px; color: #c9b8e8; }
-input[type=range] { width: 100%; accent-color: #ff2e88; }
-.picker { display: flex; flex-wrap: wrap; gap: 6px; }
-button { font: inherit; font-weight: 700; padding: 8px 10px; border: 1px solid #5b3a86; border-radius: 6px; background: #221239; color: #efe6ff; cursor: pointer; }
-button:hover { border-color: #ff2e88; }
-button.active { background: #ff2e88; border-color: #ff2e88; color: #fff; }
-button.export { background: #ffd319; border-color: #ffd319; color: #14061f; font-size: 17px; padding: 12px; }
-button.export:hover { background: #ffe14d; }
-.hint { margin: 0; color: #9d8ac2; font-size: 12px; }
-.fine { margin: 0; color: #7d6a9e; font-size: 11px; }
-#status { margin: 0; color: #7dfcd6; min-height: 1.2em; font-size: 13px; }
-.stage { display: flex; flex-direction: column; gap: 10px; align-items: center; }
-.stage canvas { width: min(66vw, 960px); max-height: 78vh; object-fit: contain; box-shadow: 0 12px 44px rgba(0, 0, 0, 0.55); border: 1px solid #3a2358; cursor: grab; }
-.stage canvas:active { cursor: grabbing; }
-/* Screenshot mode: cover only, edge to edge. */
-body.shot-cover .controls, body.shot-cover .stage .hint { display: none; }
+html, body { margin: 0; height: 100%; background: #f2f0f4; color: #1d1b22; font: 15px/1.4 system-ui, sans-serif; }
+.app { display: flex; gap: 32px; align-items: center; justify-content: center; height: 100%; padding: 24px; box-sizing: border-box; }
+.controls { display: flex; flex-direction: column; gap: 14px; width: 280px; }
+.controls h1 { margin: 0; font-size: 28px; }
+.controls p { margin: 0; color: #5c5866; }
+label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
+input[type=text] { font: inherit; padding: 8px; border: 1px solid #c9c4d1; border-radius: 6px; }
+button { font: inherit; font-weight: 700; padding: 10px; border: 0; border-radius: 6px; background: #1d1b22; color: #fff; cursor: pointer; }
+canvas { width: min(70vh, 60vw); height: min(70vh, 60vw); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); }
+body.shot-cover .controls { display: none; }
 body.shot-cover .app { padding: 0; }
-body.shot-cover .stage canvas { width: 100vw; height: 100vh; max-height: none; box-shadow: none; border: 0; object-fit: fill; }
-/* Editor screenshot mode: compact the controls so every group fits in frame. */
-body.shot-editor .app { padding: 12px; gap: 16px; }
-body.shot-editor .controls { gap: 8px; zoom: 0.72; }
-body.shot-editor .controls h1 { font-size: 22px; }
-body.shot-editor .tagline, body.shot-editor .fine { display: none; }
-body.shot-editor fieldset { padding: 6px 10px; }
-body.shot-editor label { margin: 3px 0; }
-body.shot-editor button { padding: 6px 8px; }
-body.shot-editor button.export { padding: 9px; }
+body.shot-cover canvas { width: 100vw; height: 100vh; box-shadow: none; }

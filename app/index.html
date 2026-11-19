@@ -3,74 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Neon Coast Cover Studio — GTA-style cover art maker</title>
+<title>Cover Snap</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <main class="app">
-  <section class="controls" aria-label="Cover controls">
-    <h1>NEON COAST</h1>
-    <p class="tagline">Cover Studio — turn your photo into a GTA-style poster. Runs offline, photos never leave your machine.</p>
-
-    <fieldset>
-      <legend>Photos</legend>
-      <label>Photo 1 <input id="photo-0" type="file" accept="image/*"></label>
-      <label>Photo 2 <input id="photo-1" type="file" accept="image/*"></label>
-      <label>Photo 3 <input id="photo-2" type="file" accept="image/*"></label>
-      <button id="use-samples" type="button">Use sample photos</button>
-    </fieldset>
-
-    <fieldset>
-      <legend>Words</legend>
-      <label>Caption <input id="caption" type="text" maxlength="24" value="NEON HEAT"></label>
-      <label>Subtitle <input id="subtitle" type="text" maxlength="40" value="Neon Coast nights"></label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Layout</legend>
-      <div class="picker" id="layout-picker">
-        <button type="button" data-value="vice-grid" class="active">Vice Grid</button>
-        <button type="button" data-value="nine-panel">Nine Panel</button>
-        <button type="button" data-value="full-bleed">Full Bleed</button>
-        <button type="button" data-value="tilted">Tilted Snaps</button>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Colour grade</legend>
-      <div class="picker" id="grade-picker">
-        <button type="button" data-value="sunset" class="active">Sunset</button>
-        <button type="button" data-value="neon">Neon Nights</button>
-        <button type="button" data-value="vice">Vice Pink</button>
-        <button type="button" data-value="heat">Heat Haze</button>
-        <button type="button" data-value="noir">Noir</button>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Post size</legend>
-      <div class="picker" id="size-picker">
-        <button type="button" data-value="square">Square 1080</button>
-        <button type="button" data-value="portrait">Portrait 1080×1350</button>
-        <button type="button" data-value="wide" class="active">Wide 1920×1080</button>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>Selected panel</legend>
-      <p id="panel-label" class="hint">Click a panel on the cover to select it.</p>
-      <label>Zoom <input id="zoom" type="range" min="100" max="400" value="100"></label>
-      <button id="reset-crop" type="button">Reset crop</button>
-    </fieldset>
-
-    <button id="export" type="button" class="export">Export PNG</button>
+  <section class="controls">
+    <h1>Cover Snap</h1>
+    <p>A photo and a caption, made into a square cover.</p>
+    <label>Photo <input id="photo" type="file" accept="image/*"></label>
+    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
+    <button id="export" type="button">Export PNG 1080 x 1080</button>
     <p id="status" role="status"></p>
-    <p class="fine">Original art only — no Rockstar logos, artwork or fonts. Anton &amp; Pacifico ship under the SIL Open Font License.</p>
   </section>
-  <section class="stage" aria-label="Cover preview">
-    <canvas id="cover" width="1920" height="1080" aria-label="The cover"></canvas>
-    <p class="hint">Drag a panel to move its photo · scroll to zoom · click to select</p>
-  </section>
+  <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
 </main>
 <script type="module" src="./src/main.js"></script>
 </body>
