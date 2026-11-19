@@ -1,26 +1,5 @@
 [
-  {
-    "h": 720,
-    "name": "1-cover.jpg",
-    "query": "?shot=cover&layout=tilted-snaps&grade=neon&size=wide&photo=pier,boulevard,pier&caption=Vice%20Nights&subtitle=a%20neon%20coast%20story",
-    "w": 1280
-  },
-  {
-    "h": 800,
-    "name": "2-editor.jpg",
-    "query": "?shot=editor&layout=vice-grid&grade=sunset&size=square&photo=pier,boulevard,pier&caption=Vice%20Nights&subtitle=a%20neon%20coast%20story",
-    "w": 1280
-  },
-  {
-    "h": 1080,
-    "name": "3-cover.jpg",
-    "query": "?shot=cover&layout=full-bleed&grade=teal-orange&size=portrait&photo=boulevard,pier,boulevard&caption=Coast%20Run&subtitle=midnight%20on%20the%20boulevard",
-    "w": 864
-  },
-  {
-    "h": 1080,
-    "name": "4-cover.jpg",
-    "query": "?shot=cover&layout=nine-panel&grade=noir&size=square&photo=pier,boulevard,pier&caption=Nine%20Lives&subtitle=every%20corner%20tells%20one",
-    "w": 1080
-  }
+  { "name": "1-cover.jpg", "query": "?shot=cover&photo=pier&caption=Sunset%20Heist", "w": 1080, "h": 1080 },
+  { "name": "2-editor.jpg", "query": "?shot=editor&photo=boulevard&caption=Boulevard%20Queen", "w": 1280, "h": 720 },
+  { "name": "3-cover.jpg", "query": "?shot=cover&photo=boulevard&caption=Boulevard%20Queen", "w": 1080, "h": 1080 }
 ]
