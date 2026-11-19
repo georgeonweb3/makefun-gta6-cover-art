@@ -18,4 +18,5 @@ export async function runShot(shot, query, state, loadSlot) {
   await loadSlot(2, 'samples/pier.jpg');
 
   if (shot === 'cover') document.body.classList.add('shot-cover');
+  if (shot === 'editor') document.body.classList.add('shot-editor');
 }

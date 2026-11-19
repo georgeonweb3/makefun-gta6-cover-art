@@ -26,3 +26,12 @@ button.export:hover { background: #ffe14d; }
 body.shot-cover .controls, body.shot-cover .stage .hint { display: none; }
 body.shot-cover .app { padding: 0; }
 body.shot-cover .stage canvas { width: 100vw; height: 100vh; max-height: none; box-shadow: none; border: 0; object-fit: fill; }
+/* Editor screenshot mode: compact the controls so every group fits in frame. */
+body.shot-editor .app { padding: 12px; gap: 16px; }
+body.shot-editor .controls { gap: 8px; zoom: 0.72; }
+body.shot-editor .controls h1 { font-size: 22px; }
+body.shot-editor .tagline, body.shot-editor .fine { display: none; }
+body.shot-editor fieldset { padding: 6px 10px; }
+body.shot-editor label { margin: 3px 0; }
+body.shot-editor button { padding: 6px 8px; }
+body.shot-editor button.export { padding: 9px; }

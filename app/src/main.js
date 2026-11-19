@@ -121,7 +121,7 @@ function wirePicker(groupId, apply) {
   });
 }
 
-wirePicker('layout-picker', (v) => { state.layout = v; });
+wirePicker('layout-picker', (v) => { state.layout = v; state.panels = []; });
 wirePicker('grade-picker', (v) => { state.grade = v; });
 wirePicker('size-picker', (v) => { state.sizeKey = v; });
 
@@ -174,9 +174,12 @@ canvas.addEventListener('pointermove', (e) => {
   if (!dragging) return;
   const p = canvasPoint(e);
   const crop = state.panels[selectedPanel];
-  if (crop) {
-    crop.dx += p.x - dragging.x;
-    crop.dy += p.y - dragging.y;
+  const rects = layoutPanels(state.layout, canvas.width, canvas.height);
+  const rect = rects[selectedPanel];
+  if (crop && rect) {
+    // Crop offsets are fractions of the panel size.
+    crop.dx = Math.max(-0.45, Math.min(0.45, crop.dx + (p.x - dragging.x) / rect.w));
+    crop.dy = Math.max(-0.45, Math.min(0.45, crop.dy + (p.y - dragging.y) / rect.h));
   }
   dragging = { x: p.x, y: p.y };
   redraw();

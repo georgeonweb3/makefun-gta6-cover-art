@@ -111,11 +111,23 @@ export function layoutPanels(layout, w, h) {
   ];
 }
 
-/** Ensures state.panels has one crop entry per panel of the current layout. */
+/** Ensures state.panels has one crop entry per panel of the current layout.
+ * Default crops vary slightly per panel (dx/dy are fractions of panel size),
+ * so the same photo reads as a different shot in each panel, and photos sit
+ * a touch low, which favours faces near the top of the frame. */
 export function syncPanels(state) {
   const rects = layoutPanels(state.layout, 1000, 1000);
   while (state.panels.length < rects.length) {
-    state.panels.push({ photo: state.panels.length % 3, zoom: 1, dx: 0, dy: 0 });
+    const i = state.panels.length;
+    state.panels.push({
+      photo: i % 3,
+      zoom: 1 + (i % 2) * 0.06,
+      dx: ((i * 37) % 5 - 2) * 0.05,
+      // Full Bleed's strip is far wider than a photo, so anchor its photo
+      // toward the top (faces live there; positive dy moves the photo down,
+      // showing its top); other layouts sit a touch low.
+      dy: state.layout === 'full-bleed' ? 0.6 : 0.04,
+    });
   }
   state.panels.length = rects.length;
 }
@@ -133,7 +145,12 @@ function drawPanelPhoto(ctx, rect, crop, photos, grade, seed) {
     const base = Math.max(w / img.naturalWidth, h / img.naturalHeight) * crop.zoom;
     const pw = img.naturalWidth * base;
     const ph = img.naturalHeight * base;
-    ctx.drawImage(img, x + (w - pw) / 2 + crop.dx, y + (h - ph) / 2 + crop.dy, pw, ph);
+    // Clamp the pan so the photo always covers the panel: no slack, no pan.
+    const maxDx = Math.max(0, (pw - w) / 2);
+    const maxDy = Math.max(0, (ph - h) / 2);
+    const ox = Math.max(-maxDx, Math.min(maxDx, crop.dx * w));
+    const oy = Math.max(-maxDy, Math.min(maxDy, crop.dy * h));
+    ctx.drawImage(img, x + (w - pw) / 2 + ox, y + (h - ph) / 2 + oy, pw, ph);
     ctx.filter = 'none';
   } else {
     drawProceduralScene(ctx, x, y, w, h, seed);
@@ -192,7 +209,9 @@ function drawBackdrop(ctx, w, h, grade) {
   drawPalm(ctx, w * 0.95, h * 0.9, Math.min(w, h) / 330, 0.12, '#0a0414');
 }
 
-/** The big caption + neon subtitle + badge, drawn in the title zone. */
+/** The big caption + neon subtitle + badge, drawn in the title zone.
+ * Everything is clipped to the zone and every line is fitted to its width,
+ * so long words never spill onto the neighbouring panels. */
 function drawTitleBlock(ctx, w, h, zone, caption, subtitle, grade) {
   const { x, y, w: zw, h: zh } = zone;
   const tint = GRADE_TINTS[grade];
@@ -201,6 +220,9 @@ function drawTitleBlock(ctx, w, h, zone, caption, subtitle, grade) {
   ctx.fillStyle = 'rgba(8, 4, 18, 0.55)';
   ctx.fillRect(x, y, zw, zh);
   drawHalftone(ctx, x + zw * 0.72, y + zh * 0.08, zw * 0.26, zh * 0.84, 'rgba(255, 255, 255, 0.16)', Math.max(2, zh * 0.02));
+  ctx.beginPath();
+  ctx.rect(x, y, zw, zh);
+  ctx.clip();
   // Caption, fitted to the zone width.
   const text = (caption.trim() || 'NEON HEAT').toUpperCase();
   let size = zh * 0.52;
@@ -213,29 +235,39 @@ function drawTitleBlock(ctx, w, h, zone, caption, subtitle, grade) {
   ctx.textAlign = 'left';
   // Black offset + white face, GTA-poster style.
   ctx.fillStyle = '#0a0512';
-  ctx.fillText(text, x + zw * 0.05 + size * 0.045, y + zh * 0.44 + size * 0.045);
+  ctx.fillText(text, x + zw * 0.05 + size * 0.045, y + zh * 0.38 + size * 0.045);
   const face = ctx.createLinearGradient(0, y, 0, y + zh);
   face.addColorStop(0, '#ffffff');
   face.addColorStop(1, '#ffe9a8');
   ctx.fillStyle = face;
-  ctx.fillText(text, x + zw * 0.05, y + zh * 0.44);
-  // Pink underline bar.
+  ctx.fillText(text, x + zw * 0.05, y + zh * 0.38);
+  // Pink underline bar, just under the caption, clear of the subtitle.
   ctx.fillStyle = tint.glow;
-  ctx.fillRect(x + zw * 0.05, y + zh * 0.44 + size * 0.52, Math.min(zw * 0.3, ctx.measureText(text).width), Math.max(4, zh * 0.045));
-  // Neon script subtitle.
+  ctx.fillRect(x + zw * 0.05, y + zh * 0.38 + size * 0.55, Math.min(zw * 0.3, ctx.measureText(text).width), Math.max(4, zh * 0.045));
+  // Neon script subtitle, shrunk until it fits the zone.
   if (subtitle.trim()) {
-    const subSize = Math.max(14, zh * 0.17);
+    let subSize = Math.max(14, zh * 0.15);
     ctx.font = `${subSize}px Pacifico, cursive`;
+    while (ctx.measureText(subtitle.trim()).width > zw * 0.9 && subSize > 10) {
+      subSize -= 1;
+      ctx.font = `${subSize}px Pacifico, cursive`;
+    }
     ctx.fillStyle = '#ffffff';
     ctx.shadowColor = tint.glow;
     ctx.shadowBlur = subSize * 0.55;
-    ctx.fillText(subtitle.trim(), x + zw * 0.05, y + zh * 0.82);
+    ctx.fillText(subtitle.trim(), x + zw * 0.05, y + zh * 0.80);
     ctx.shadowBlur = 0;
   }
-  // Badge ribbon, top-right of the zone.
+  // Badge ribbon, top-right of the zone, shrunk until it fits.
   const badge = '★ NEON COAST ★';
-  ctx.font = `bold ${Math.max(11, zh * 0.11)}px Anton, sans-serif`;
-  const bw = ctx.measureText(badge).width + zh * 0.22;
+  let badgeSize = Math.max(11, zh * 0.11);
+  ctx.font = `bold ${badgeSize}px Anton, sans-serif`;
+  let bw = ctx.measureText(badge).width + zh * 0.22;
+  while (bw > zw * 0.96 && badgeSize > 8) {
+    badgeSize -= 1;
+    ctx.font = `bold ${badgeSize}px Anton, sans-serif`;
+    bw = ctx.measureText(badge).width + zh * 0.22;
+  }
   const bx = x + zw - bw - zw * 0.02;
   const by = y + zh * 0.06;
   const bh = zh * 0.2;
@@ -345,7 +377,7 @@ export function drawCover(canvas, state) {
   } else if (state.layout === 'full-bleed') {
     drawTitleBlock(ctx, w, h, { x: 0, y: h * 0.72, w, h: h * 0.28 }, state.caption, state.subtitle, state.grade);
     // Sports car parked across the bottom of the photo.
-    drawCar(ctx, w * 0.68, h * 0.70, Math.min(w, h) / 900, '#ff2e88', '#9be8ff');
+    drawCar(ctx, w * 0.68, h * 0.685, Math.min(w, h) / 650, '#ff2e88', '#9be8ff');
   } else if (state.layout === 'tilted') {
     drawTitleBlock(ctx, w, h, { x: w * 0.05, y: h * 0.66, w: w * 0.9, h: h * 0.28 }, state.caption, state.subtitle, state.grade);
   } else {
