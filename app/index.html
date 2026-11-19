@@ -3,20 +3,61 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cover Snap</title>
+<meta name="description" content="Vice Sunset Cover Studio — turn your photos into GTA-style multi-panel Vice City poster art, offline in your browser.">
+<link rel="icon" href="data:,">
+<title>Vice Sunset Cover Studio — GTA-style cover art maker</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <main class="app">
-  <section class="controls">
-    <h1>Cover Snap</h1>
-    <p>A photo and a caption, made into a square cover.</p>
-    <label>Photo <input id="photo" type="file" accept="image/*"></label>
-    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
-    <button id="export" type="button">Export PNG 1080 x 1080</button>
+  <section class="panel controls" aria-label="Cover editor">
+    <h1>Vice Sunset<br>Cover Studio</h1>
+    <p class="tag">Turn your photos into a Vice City poster. No upload, no account — everything happens in your browser.</p>
+
+    <h2>1 · Layout</h2>
+    <div class="choices" id="layoutChoices" role="group" aria-label="Layout">
+      <button type="button" data-layout="vice" class="picked">Vice Grid</button>
+      <button type="button" data-layout="nine">Nine Panel</button>
+      <button type="button" data-layout="full">Full Bleed</button>
+      <button type="button" data-layout="tilted">Tilted Snaps</button>
+    </div>
+
+    <h2>2 · Colour grade</h2>
+    <div class="choices" id="gradeChoices" role="group" aria-label="Colour grade">
+      <button type="button" data-grade="sunset" class="picked">Vice Sunset</button>
+      <button type="button" data-grade="neon">Neon Night</button>
+      <button type="button" data-grade="teal">Teal / Orange</button>
+      <button type="button" data-grade="noir">Noir</button>
+      <button type="button" data-grade="faded">Faded Film</button>
+    </div>
+
+    <h2>3 · Post size</h2>
+    <div class="choices" id="sizeChoices" role="group" aria-label="Export size">
+      <button type="button" data-size="1080x1080" class="picked">1080 × 1080</button>
+      <button type="button" data-size="1080x1350">1080 × 1350</button>
+      <button type="button" data-size="1920x1080">1920 × 1080</button>
+    </div>
+
+    <h2>4 · Caption</h2>
+    <label class="field">Headline
+      <input id="caption" type="text" maxlength="34" value="VICE SUNSET" autocomplete="off">
+    </label>
+    <label class="field">Subtitle
+      <input id="subtitle" type="text" maxlength="48" value="a vice city story" autocomplete="off">
+    </label>
+
+    <h2>5 · Your photos <span class="hint">— up to 3, each fills one panel</span></h2>
+    <div class="slots" id="slots"></div>
+    <p class="tip">Tip: click a panel to pick it, drag inside it to move your photo, scroll to zoom. “Drawn art” restores the characters.</p>
+
+    <button id="export" type="button" class="export">Export PNG</button>
     <p id="status" role="status"></p>
   </section>
-  <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
+
+  <section class="preview" aria-label="Live preview">
+    <canvas id="cover" width="1080" height="1080" aria-label="Live preview of your cover"></canvas>
+    <p class="preview-note">Live preview — what you see is what the PNG looks like.</p>
+  </section>
 </main>
 <script type="module" src="./src/main.js"></script>
 </body>
