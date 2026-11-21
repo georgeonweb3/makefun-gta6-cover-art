@@ -1,276 +1,290 @@
-// Code drawn art for the cover panels. Every picture here is drawn from paths and
-// gradients, no photo and no borrowed artwork. The drawing is deterministic: the
-// little random choices come from a seeded generator, so two runs paint the same bytes.
-export function seeded(seed) {
-  let s = (seed >>> 0) || 1;
-  return () => {
-    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
-    return s / 4294967296;
+// Code-drawn illustration for Neon Coast Cover Studio.
+// Every panel that has no photo gets art drawn from code: a striped retro
+// sun, a lit skyline, palm trees, a sports car over a neon grid, a
+// perspective grid, or halftone dots. Nothing here is a borrowed image.
+// All drawing is clipped to the panel rectangle and deterministic: the
+// same seed always draws the same art.
+
+// Tiny deterministic random so a panel's art never changes between renders.
+export function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
 
-function sky(ctx, x, y, w, h, g) {
-  const grad = ctx.createLinearGradient(0, y, 0, y + h);
-  grad.addColorStop(0, g.skyTop);
-  grad.addColorStop(0.55, g.skyMid);
-  grad.addColorStop(1, g.skyBot);
-  ctx.fillStyle = grad;
+function skyFill(ctx, x, y, w, h, grade) {
+  const g = ctx.createLinearGradient(x, y, x, y + h);
+  g.addColorStop(0, grade.sky[0]);
+  g.addColorStop(0.55, grade.sky[1]);
+  g.addColorStop(1, grade.sky[2]);
+  ctx.fillStyle = g;
   ctx.fillRect(x, y, w, h);
 }
 
-// A retro sun: a disc cut by horizontal bars that grow wider toward its foot.
-export function drawSun(ctx, x, y, w, h, g) {
-  sky(ctx, x, y, w, h, g);
-  const cx = x + w / 2;
-  const cy = y + h * 0.42;
-  const r = Math.min(w, h) * 0.3;
+// Retro sun: a glowing disc with horizontal stripe gaps cut across its
+// lower half, the classic synthwave sun.
+export function drawSun(ctx, cx, cy, r, grade) {
+  ctx.save();
+  ctx.shadowColor = grade.sunRing;
+  ctx.shadowBlur = r * 0.35;
+  const g = ctx.createLinearGradient(cx, cy - r, cx, cy + r);
+  g.addColorStop(0, grade.sun);
+  g.addColorStop(1, grade.sunRing);
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  // Stripe gaps: bars of the sky's middle colour across the lower half.
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, r, 0, Math.PI * 2);
   ctx.clip();
-  const sunGrad = ctx.createLinearGradient(0, cy - r, 0, cy + r);
-  sunGrad.addColorStop(0, g.sunCore);
-  sunGrad.addColorStop(1, g.sun);
-  ctx.fillStyle = sunGrad;
-  ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
-  ctx.fillStyle = g.skyMid;
-  let band = cy - r * 0.1;
-  let gap = r * 0.03;
-  while (band < cy + r) {
-    ctx.fillRect(cx - r, band, r * 2, gap);
-    band += gap + r * 0.11;
-    gap *= 1.55;
+  ctx.fillStyle = grade.sky[1];
+  let barY = cy + r * 0.05;
+  let barH = Math.max(2, r * 0.045);
+  while (barY < cy + r) {
+    ctx.fillRect(cx - r, barY, r * 2, barH);
+    barY += barH * 2.4;
+    barH *= 1.35;
   }
   ctx.restore();
-  const glow = ctx.createRadialGradient(cx, cy, r * 0.4, cx, cy, r * 1.7);
-  glow.addColorStop(0, g.sun + '55');
-  glow.addColorStop(1, g.sun + '00');
-  ctx.fillStyle = glow;
-  ctx.fillRect(x, y, w, h);
-  ground(ctx, x, y, w, h, g);
 }
 
-function ground(ctx, x, y, w, h, g) {
-  const gy = y + h * 0.78;
-  ctx.fillStyle = g.frame;
-  ctx.fillRect(x, gy, w, h - (gy - y));
-  ctx.strokeStyle = g.neon;
-  ctx.lineWidth = Math.max(1, h * 0.004);
-  ctx.beginPath();
-  ctx.moveTo(x, gy);
-  ctx.lineTo(x + w, gy);
-  ctx.stroke();
-}
-
-// A city skyline at dusk, windows lit in the grade's neon.
-export function drawSkyline(ctx, x, y, w, h, g) {
-  sky(ctx, x, y, w, h, g);
-  const rand = seeded(7);
-  const base = y + h * 0.8;
-  ctx.fillStyle = g.frame;
-  ctx.fillRect(x, base, w, h - (base - y));
+// Lit skyline: dark towers with a few glowing windows.
+export function drawSkyline(ctx, x, y, w, h, grade, seed) {
+  const rnd = mulberry32(seed);
+  const base = y + h;
+  ctx.fillStyle = grade.ground;
+  ctx.fillRect(x, base - h * 0.12, w, h * 0.12);
   let bx = x;
   while (bx < x + w) {
-    const bw = w * (0.09 + rand() * 0.1);
-    const bh = h * (0.22 + rand() * 0.42);
-    ctx.fillStyle = '#12041f';
+    const bw = w * (0.09 + rnd() * 0.12);
+    const bh = h * (0.25 + rnd() * 0.5);
+    ctx.fillStyle = '#0d0618';
     ctx.fillRect(bx, base - bh, bw, bh);
-    if (rand() > 0.6) {
-      ctx.fillRect(bx + bw * 0.3, base - bh - h * 0.07, bw * 0.4, h * 0.07);
+    // Antenna on the tallest towers.
+    if (bh > h * 0.6) {
+      ctx.fillRect(bx + bw / 2 - 1, base - bh - h * 0.08, 2, h * 0.08);
+      ctx.fillStyle = grade.accent;
+      ctx.beginPath();
+      ctx.arc(bx + bw / 2, base - bh - h * 0.08, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0d0618';
     }
-    ctx.fillStyle = g.neon2;
-    const rows = Math.floor(bh / (h * 0.09));
-    const cols = Math.floor(bw / (w * 0.05));
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        if (rand() > 0.55) {
-          ctx.fillRect(bx + w * 0.015 + c * w * 0.05, base - bh + h * 0.03 + r * h * 0.09, w * 0.022, h * 0.035);
+    // Lit windows.
+    ctx.fillStyle = grade.sun;
+    const cols = Math.max(1, Math.floor(bw / 12));
+    const rows = Math.max(1, Math.floor(bh / 14));
+    for (let c = 0; c < cols; c++) {
+      for (let r = 0; r < rows; r++) {
+        if (rnd() < 0.28) {
+          ctx.fillRect(bx + 4 + c * 12, base - bh + 5 + r * 14, 5, 7);
         }
       }
     }
-    bx += bw + w * 0.015;
-  }
-  ctx.fillStyle = g.sun;
-  ctx.beginPath();
-  ctx.arc(x + w * 0.78, y + h * 0.2, Math.min(w, h) * 0.09, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-// Two palm silhouettes leaning over a neon horizon.
-export function drawPalms(ctx, x, y, w, h, g) {
-  sky(ctx, x, y, w, h, g);
-  const horizon = y + h * 0.72;
-  ctx.fillStyle = g.frame;
-  ctx.fillRect(x, horizon, w, h - (horizon - y));
-  ctx.strokeStyle = g.neon;
-  ctx.lineWidth = Math.max(1, h * 0.005);
-  ctx.beginPath();
-  ctx.moveTo(x, horizon);
-  ctx.lineTo(x + w, horizon);
-  ctx.stroke();
-  palm(ctx, x + w * 0.24, horizon, h * 0.62, -0.22, g);
-  palm(ctx, x + w * 0.74, horizon, h * 0.5, 0.18, g);
-}
-
-function palm(ctx, baseX, baseY, size, lean, g) {
-  const topX = baseX + size * lean;
-  const topY = baseY - size;
-  ctx.strokeStyle = '#0d0218';
-  ctx.lineWidth = size * 0.045;
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.moveTo(baseX, baseY);
-  ctx.quadraticCurveTo(baseX + size * lean * 0.4, baseY - size * 0.55, topX, topY);
-  ctx.stroke();
-  ctx.lineWidth = size * 0.032;
-  for (let i = 0; i < 7; i++) {
-    const a = (-0.08 - i * 0.14) * Math.PI;
-    const len = size * (0.36 - Math.abs(i - 3) * 0.035);
-    ctx.beginPath();
-    ctx.moveTo(topX, topY);
-    ctx.quadraticCurveTo(
-      topX + Math.cos(a) * len * 0.55, topY + Math.sin(a) * len * 0.5,
-      topX + Math.cos(a) * len, topY + Math.sin(a) * len * 0.35 + len * 0.42,
-    );
-    ctx.stroke();
+    ctx.fillStyle = '#0d0618';
+    bx += bw + 2;
   }
 }
 
-// A low sports car side profile over a neon grid floor.
-export function drawCar(ctx, x, y, w, h, g) {
-  sky(ctx, x, y, w, h, g);
-  const horizon = y + h * 0.58;
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(x, horizon, w, h - (horizon - y));
-  ctx.clip();
-  ctx.strokeStyle = g.neon + 'aa';
-  ctx.lineWidth = Math.max(1, h * 0.003);
-  for (let i = 0; i <= 10; i++) {
-    const px = x + w / 2 + (i - 5) * w * 0.16;
+// Palm trees: curved trunks with fronds that arc downward. Fronds are
+// drawn as quadratic curves from the crown, never as straight rays, so
+// they read as palms instead of starbursts.
+export function drawPalms(ctx, x, y, w, h, grade, seed) {
+  const rnd = mulberry32(seed);
+  const count = 2;
+  for (let i = 0; i < count; i++) {
+    const baseX = x + w * (0.25 + i * 0.5 + (rnd() - 0.5) * 0.12);
+    const baseY = y + h;
+    const topX = baseX + (rnd() - 0.5) * w * 0.2;
+    const topY = y + h * (0.28 + rnd() * 0.12);
+    ctx.strokeStyle = '#14092b';
+    ctx.lineWidth = Math.max(3, w * 0.02);
+    ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(x + w / 2, horizon);
-    ctx.lineTo(px, y + h);
+    ctx.moveTo(baseX, baseY);
+    ctx.quadraticCurveTo(baseX + (topX - baseX) * 0.3, baseY - h * 0.4, topX, topY);
     ctx.stroke();
-  }
-  for (let i = 0; i < 6; i++) {
-    const yy = horizon + (h - (horizon - y)) * (i / 5) * (i / 5);
+    // Seven fronds arcing down from the crown.
+    ctx.strokeStyle = '#1c4d2e';
+    ctx.lineWidth = Math.max(2, w * 0.012);
+    for (let f = 0; f < 7; f++) {
+      const ang = (-Math.PI * 0.15) - (f * Math.PI) / 7.2;
+      const len = w * (0.16 + rnd() * 0.08);
+      const endX = topX + Math.cos(ang) * len;
+      const endY = topY + Math.abs(Math.sin(ang)) * len * 0.75 + len * 0.15;
+      const midX = topX + Math.cos(ang) * len * 0.55;
+      const midY = topY - len * 0.28;
+      ctx.beginPath();
+      ctx.moveTo(topX, topY);
+      ctx.quadraticCurveTo(midX, midY, endX, endY);
+      ctx.stroke();
+    }
+    // Coconuts at the crown.
+    ctx.fillStyle = '#3a2410';
     ctx.beginPath();
-    ctx.moveTo(x, yy);
-    ctx.lineTo(x + w, yy);
-    ctx.stroke();
-  }
-  ctx.restore();
-  const cw = w * 0.72;
-  const ch = h * 0.2;
-  const cx = x + w * 0.14;
-  const cy = horizon - ch * 0.55;
-  ctx.fillStyle = g.neon + '33';
-  ctx.beginPath();
-  ctx.ellipse(cx + cw / 2, horizon + h * 0.03, cw * 0.55, h * 0.03, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = '#0d0218';
-  ctx.beginPath();
-  ctx.moveTo(cx, cy + ch * 0.9);
-  ctx.lineTo(cx + cw * 0.06, cy + ch * 0.55);
-  ctx.lineTo(cx + cw * 0.3, cy + ch * 0.42);
-  ctx.quadraticCurveTo(cx + cw * 0.42, cy, cx + cw * 0.58, cy + ch * 0.1);
-  ctx.lineTo(cx + cw * 0.78, cy + ch * 0.32);
-  ctx.quadraticCurveTo(cx + cw * 0.95, cy + ch * 0.4, cx + cw, cy + ch * 0.62);
-  ctx.lineTo(cx + cw, cy + ch * 0.9);
-  ctx.closePath();
-  ctx.fill();
-  ctx.fillStyle = g.neon2;
-  ctx.beginPath();
-  ctx.moveTo(cx + cw * 0.34, cy + ch * 0.44);
-  ctx.quadraticCurveTo(cx + cw * 0.44, cy + ch * 0.14, cx + cw * 0.56, cy + ch * 0.2);
-  ctx.lineTo(cx + cw * 0.72, cy + ch * 0.36);
-  ctx.closePath();
-  ctx.fill();
-  wheel(ctx, cx + cw * 0.24, cy + ch * 0.9, ch * 0.26, g);
-  wheel(ctx, cx + cw * 0.78, cy + ch * 0.9, ch * 0.26, g);
-  ctx.fillStyle = g.neon;
-  ctx.fillRect(cx + cw * 0.94, cy + ch * 0.5, cw * 0.05, ch * 0.08);
-}
-
-function wheel(ctx, wx, wy, r, g) {
-  ctx.fillStyle = '#05010a';
-  ctx.beginPath();
-  ctx.arc(wx, wy, r, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = g.neon;
-  ctx.lineWidth = Math.max(1, r * 0.1);
-  ctx.beginPath();
-  ctx.arc(wx, wy, r * 0.55, 0, Math.PI * 2);
-  ctx.stroke();
-}
-
-// A perspective neon grid, the floor of the Vice City look. withSun false leaves the
-// sky clear, for layouts that put their own title over it.
-export function drawGrid(ctx, x, y, w, h, g, withSun = true) {
-  const grad = ctx.createLinearGradient(0, y, 0, y + h);
-  grad.addColorStop(0, g.skyTop);
-  grad.addColorStop(1, g.panel);
-  ctx.fillStyle = grad;
-  ctx.fillRect(x, y, w, h);
-  const horizon = y + h * 0.42;
-  ctx.strokeStyle = g.neon;
-  ctx.lineWidth = Math.max(1, h * 0.004);
-  for (let i = -6; i <= 6; i++) {
-    ctx.beginPath();
-    ctx.moveTo(x + w / 2, horizon);
-    ctx.lineTo(x + w / 2 + i * w * 0.24, y + h);
-    ctx.stroke();
-  }
-  for (let i = 0; i < 7; i++) {
-    const t = i / 6;
-    const yy = horizon + (h - (horizon - y)) * t * t;
-    ctx.globalAlpha = 0.35 + t * 0.65;
-    ctx.beginPath();
-    ctx.moveTo(x, yy);
-    ctx.lineTo(x + w, yy);
-    ctx.stroke();
-  }
-  ctx.globalAlpha = 1;
-  if (withSun) {
-    ctx.fillStyle = g.sun;
-    ctx.beginPath();
-    ctx.arc(x + w / 2, y + h * 0.2, Math.min(w, h) * 0.12, 0, Math.PI * 2);
+    ctx.arc(topX - 4, topY + 5, 4, 0, Math.PI * 2);
+    ctx.arc(topX + 5, topY + 6, 4, 0, Math.PI * 2);
     ctx.fill();
   }
 }
 
-// Halftone dots that grow toward the corner, a print poster texture.
-export function drawHalftone(ctx, x, y, w, h, g) {
-  ctx.fillStyle = g.panel;
-  ctx.fillRect(x, y, w, h);
-  const step = Math.max(10, w * 0.045);
-  for (let ry = 0; ry * step < h; ry++) {
-    for (let cx = 0; cx * step < w; cx++) {
-      const px = x + cx * step + step / 2;
-      const py = y + ry * step + step / 2;
-      const d = Math.hypot(px - (x + w), py - (y + h)) / Math.hypot(w, h);
-      const r = step * 0.42 * (1 - d) + step * 0.06;
-      ctx.fillStyle = (cx + ry) % 2 === 0 ? g.neon : g.neon2;
-      ctx.globalAlpha = 0.5 + (1 - d) * 0.5;
+// Sports car in side profile over a neon grid floor, with an underglow.
+export function drawCar(ctx, x, y, w, h, grade) {
+  const gy = y + h * 0.78;
+  // Neon grid floor.
+  ctx.strokeStyle = grade.grid;
+  ctx.globalAlpha = 0.55;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x, gy);
+  ctx.lineTo(x + w, gy);
+  ctx.stroke();
+  for (let i = 0; i <= 6; i++) {
+    const gx = x + (w * i) / 6;
+    ctx.beginPath();
+    ctx.moveTo(gx, gy);
+    ctx.lineTo(x + w / 2 + (gx - (x + w / 2)) * 2.2, y + h);
+    ctx.stroke();
+  }
+  for (let i = 1; i <= 3; i++) {
+    const hy = gy + ((y + h - gy) * i) / 3.4;
+    ctx.beginPath();
+    ctx.moveTo(x, hy);
+    ctx.lineTo(x + w, hy);
+    ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  // Underglow.
+  ctx.save();
+  ctx.shadowColor = grade.accent;
+  ctx.shadowBlur = 18;
+  ctx.fillStyle = grade.accent;
+  ctx.fillRect(x + w * 0.2, gy + 2, w * 0.6, 3);
+  ctx.restore();
+  // Body: low wedge with a cabin.
+  const bx = x + w * 0.14;
+  const bw = w * 0.72;
+  const by = gy - h * 0.2;
+  ctx.fillStyle = '#12061f';
+  ctx.beginPath();
+  ctx.moveTo(bx, by + h * 0.14);
+  ctx.lineTo(bx + bw * 0.12, by + h * 0.02);
+  ctx.lineTo(bx + bw * 0.38, by);
+  ctx.lineTo(bx + bw * 0.62, by + h * 0.02);
+  ctx.lineTo(bx + bw * 0.94, by + h * 0.06);
+  ctx.lineTo(bx + bw, by + h * 0.14);
+  ctx.lineTo(bx + bw * 0.96, by + h * 0.2);
+  ctx.lineTo(bx + bw * 0.04, by + h * 0.2);
+  ctx.closePath();
+  ctx.fill();
+  // Cabin glass.
+  ctx.fillStyle = grade.grid;
+  ctx.beginPath();
+  ctx.moveTo(bx + bw * 0.4, by + h * 0.015);
+  ctx.lineTo(bx + bw * 0.6, by + h * 0.03);
+  ctx.lineTo(bx + bw * 0.58, by + h * 0.09);
+  ctx.lineTo(bx + bw * 0.42, by + h * 0.09);
+  ctx.closePath();
+  ctx.fill();
+  // Wheels.
+  for (const wx of [bx + bw * 0.22, bx + bw * 0.78]) {
+    ctx.fillStyle = '#05030a';
+    ctx.beginPath();
+    ctx.arc(wx, gy + 2, h * 0.075, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = grade.sun;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(wx, gy + 2, h * 0.04, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  // Headlight beam.
+  ctx.strokeStyle = grade.sun;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(bx + bw * 0.97, by + h * 0.1);
+  ctx.lineTo(bx + bw * 1.25, by + h * 0.02);
+  ctx.stroke();
+}
+
+// Perspective neon grid, horizon at the upper third.
+export function drawGrid(ctx, x, y, w, h, grade) {
+  const hy = y + h * 0.34;
+  ctx.strokeStyle = grade.grid;
+  ctx.lineWidth = 1.5;
+  ctx.globalAlpha = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(x, hy);
+  ctx.lineTo(x + w, hy);
+  ctx.stroke();
+  for (let i = 0; i <= 8; i++) {
+    const gx = x + (w * i) / 8;
+    ctx.beginPath();
+    ctx.moveTo(gx, hy);
+    ctx.lineTo(x + w / 2 + (gx - (x + w / 2)) * 2.4, y + h);
+    ctx.stroke();
+  }
+  let rowY = hy;
+  let step = (h - (hy - y)) * 0.06;
+  while (rowY < y + h) {
+    ctx.beginPath();
+    ctx.moveTo(x, rowY);
+    ctx.lineTo(x + w, rowY);
+    ctx.stroke();
+    rowY += step;
+    step *= 1.6;
+  }
+  ctx.globalAlpha = 1;
+}
+
+// Halftone dots, denser toward the bottom.
+export function drawHalftone(ctx, x, y, w, h, grade) {
+  ctx.fillStyle = grade.accent;
+  const gap = Math.max(9, w * 0.045);
+  for (let row = 0; row * gap < h; row++) {
+    const r = Math.max(1, (row / (h / gap)) * gap * 0.22);
+    for (let col = 0; col * gap < w; col++) {
+      ctx.globalAlpha = 0.35 + 0.5 * (row / (h / gap));
       ctx.beginPath();
-      ctx.arc(px, py, r, 0, Math.PI * 2);
+      ctx.arc(x + col * gap + gap / 2, y + row * gap + gap / 2, r, 0, Math.PI * 2);
       ctx.fill();
     }
   }
   ctx.globalAlpha = 1;
 }
 
-export function drawArt(ctx, kind, x, y, w, h, g) {
+// Draw one art panel: sky gradient, then the named art, clipped to rect.
+export function drawPanelArt(ctx, rect, kind, grade, seed) {
   ctx.save();
   ctx.beginPath();
-  ctx.rect(x, y, w, h);
+  ctx.rect(rect.x, rect.y, rect.w, rect.h);
   ctx.clip();
-  if (kind === 'sun') drawSun(ctx, x, y, w, h, g);
-  else if (kind === 'skyline') drawSkyline(ctx, x, y, w, h, g);
-  else if (kind === 'palms') drawPalms(ctx, x, y, w, h, g);
-  else if (kind === 'car') drawCar(ctx, x, y, w, h, g);
-  else if (kind === 'grid') drawGrid(ctx, x, y, w, h, g);
-  else drawHalftone(ctx, x, y, w, h, g);
+  skyFill(ctx, rect.x, rect.y, rect.w, rect.h, grade);
+  if (kind === 'sun') {
+    drawSun(ctx, rect.x + rect.w / 2, rect.y + rect.h * 0.42, Math.min(rect.w, rect.h) * 0.3, grade);
+    drawSkyline(ctx, rect.x, rect.y, rect.w, rect.h, grade, seed + 3);
+  } else if (kind === 'skyline') {
+    drawSun(ctx, rect.x + rect.w * 0.72, rect.y + rect.h * 0.3, Math.min(rect.w, rect.h) * 0.2, grade);
+    drawSkyline(ctx, rect.x, rect.y, rect.w, rect.h, grade, seed + 5);
+  } else if (kind === 'palms') {
+    drawSun(ctx, rect.x + rect.w * 0.5, rect.y + rect.h * 0.3, Math.min(rect.w, rect.h) * 0.22, grade);
+    drawPalms(ctx, rect.x, rect.y, rect.w, rect.h, grade, seed + 7);
+  } else if (kind === 'car') {
+    drawCar(ctx, rect.x, rect.y, rect.w, rect.h, grade);
+  } else if (kind === 'grid') {
+    drawSun(ctx, rect.x + rect.w * 0.5, rect.y + rect.h * 0.22, Math.min(rect.w, rect.h) * 0.16, grade);
+    drawGrid(ctx, rect.x, rect.y, rect.w, rect.h, grade);
+  } else {
+    drawHalftone(ctx, rect.x, rect.y, rect.w, rect.h, grade);
+  }
   ctx.restore();
 }
+
+export const ART_KINDS = ['sun', 'skyline', 'palms', 'car', 'grid', 'halftone'];

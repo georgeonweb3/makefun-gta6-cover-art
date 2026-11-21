@@ -4,84 +4,71 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Neon Coast Cover Studio</title>
-<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="top">
-  <h1>Neon Coast Cover Studio</h1>
-  <p>Your photo and a caption, turned into a GTA 6 style cover poster. Everything runs offline in this page.</p>
+<header class="topbar">
+  <div>
+    <h1>Neon Coast Cover Studio</h1>
+    <p>Turn your photos and a caption into GTA-style cover art. Everything runs on your machine, nothing is uploaded.</p>
+  </div>
+  <div class="top-actions">
+    <button id="export-png" type="button">Export PNG</button>
+  </div>
 </header>
-<main class="app">
-  <section class="controls" aria-label="Cover controls">
-    <div class="group">
+<main class="editor">
+  <section class="preview-wrap">
+    <canvas id="cover" width="1080" height="1080" aria-label="Cover preview"></canvas>
+    <p class="hint">Drag a photo panel to move it. The preview is drawn at the export size.</p>
+  </section>
+  <aside class="controls">
+    <section>
       <h2>Photos</h2>
-      <p class="hint">Add up to three photos. Click a panel on the cover to pick it, then drag it or use the sliders.</p>
-      <div class="slot" data-slot="0">
-        <span class="slot-name">Photo 1</span>
-        <input type="file" accept="image/*" data-photo="0" aria-label="Photo 1 file">
-        <button type="button" data-sample="0" data-name="pier">Sample pier</button>
-        <button type="button" data-clear="0">Clear</button>
+      <p class="note">Up to three photos. Panels share them in order, or show code-drawn art when a slot is empty.</p>
+      <div class="photo-row">
+        <label id="photo-label-0" for="photo-0">Photo 1: none yet</label>
+        <input id="photo-0" type="file" accept="image/*">
+        <button id="sample-0" type="button">Use sample pier photo</button>
+        <label for="zoom-0">Zoom photo 1</label>
+        <input id="zoom-0" type="range" min="1" max="3" step="0.05" value="1">
       </div>
-      <div class="slot" data-slot="1">
-        <span class="slot-name">Photo 2</span>
-        <input type="file" accept="image/*" data-photo="1" aria-label="Photo 2 file">
-        <button type="button" data-sample="1" data-name="boulevard">Sample street</button>
-        <button type="button" data-clear="1">Clear</button>
+      <div class="photo-row">
+        <label id="photo-label-1" for="photo-1">Photo 2: none yet</label>
+        <input id="photo-1" type="file" accept="image/*">
+        <button id="sample-1" type="button">Use sample boulevard photo</button>
+        <label for="zoom-1">Zoom photo 2</label>
+        <input id="zoom-1" type="range" min="1" max="3" step="0.05" value="1">
       </div>
-      <div class="slot" data-slot="2">
-        <span class="slot-name">Photo 3</span>
-        <input type="file" accept="image/*" data-photo="2" aria-label="Photo 3 file">
-        <button type="button" data-sample="2" data-name="pier">Sample pier</button>
-        <button type="button" data-clear="2">Clear</button>
+      <div class="photo-row">
+        <label id="photo-label-2" for="photo-2">Photo 3: none yet</label>
+        <input id="photo-2" type="file" accept="image/*">
+        <button id="sample-2" type="button">Use sample pier photo</button>
+        <label for="zoom-2">Zoom photo 3</label>
+        <input id="zoom-2" type="range" min="1" max="3" step="0.05" value="1">
       </div>
-      <p class="hint">Empty panels show code drawn art: sun, skyline, palms, car, neon grid.</p>
-    </div>
-    <div class="group">
+    </section>
+    <section>
       <h2>Layout</h2>
-      <div class="radios" id="layouts">
-        <label><input type="radio" name="layout" value="vice-grid" checked> Vice Grid</label>
-        <label><input type="radio" name="layout" value="nine-panel"> Nine Panel</label>
-        <label><input type="radio" name="layout" value="full-bleed"> Full Bleed</label>
-        <label><input type="radio" name="layout" value="tilted-snaps"> Tilted Snaps</label>
-      </div>
-    </div>
-    <div class="group">
-      <h2>Grade</h2>
-      <div class="swatches" id="grades">
-        <button type="button" data-grade="vice-sunset" class="on" style="--sw1:#ff5e7a;--sw2:#ffb347">Vice Sunset</button>
-        <button type="button" data-grade="neon-nights" style="--sw1:#7b2fff;--sw2:#00e5ff">Neon Nights</button>
-        <button type="button" data-grade="palm-dusk" style="--sw1:#00b39a;--sw2:#ffd166">Palm Dusk</button>
-        <button type="button" data-grade="heat-wave" style="--sw1:#ff2e2e;--sw2:#ff9a3d">Heat Wave</button>
-        <button type="button" data-grade="chrome-blue" style="--sw1:#2f6bff;--sw2:#c8d6ff">Chrome Blue</button>
-      </div>
-    </div>
-    <div class="group">
-      <h2>Words</h2>
-      <label>Title <input id="caption" type="text" maxlength="32" value="Sunset Heist"></label>
-      <label>Subtitle <input id="subtitle" type="text" maxlength="32" value="Neon Coast"></label>
-    </div>
-    <div class="group">
-      <h2>Selected panel <span id="panelName">1</span></h2>
-      <label>Zoom <input id="zoom" type="range" min="100" max="250" value="100"></label>
-      <label>Move left and right <input id="panX" type="range" min="-400" max="400" value="0"></label>
-      <label>Move up and down <input id="panY" type="range" min="-400" max="400" value="0"></label>
-      <button type="button" id="resetPan">Reset this panel</button>
-    </div>
-    <div class="group">
-      <h2>Export</h2>
-      <div class="exports">
-        <button type="button" data-export="1080x1080">PNG 1080 x 1080</button>
-        <button type="button" data-export="1080x1350">PNG 1080 x 1350</button>
-        <button type="button" data-export="1920x1080">PNG 1920 x 1080</button>
-      </div>
-      <p id="status" role="status"></p>
-    </div>
-  </section>
-  <section class="stage" aria-label="Cover preview">
-    <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
-    <p class="hint">Click a panel to select it. Drag a photo panel to move the photo inside it.</p>
-  </section>
+      <div id="layouts" class="button-row"></div>
+    </section>
+    <section>
+      <h2>Colour grade</h2>
+      <div id="grades" class="button-row"></div>
+    </section>
+    <section>
+      <h2>Caption</h2>
+      <label for="caption-title">Title</label>
+      <input id="caption-title" type="text" maxlength="24" value="Sunset Heist">
+      <label for="caption-sub">Subtitle</label>
+      <input id="caption-sub" type="text" maxlength="24" value="Neon Coast">
+    </section>
+    <section>
+      <h2>Export size</h2>
+      <div id="sizes" class="button-row"></div>
+      <p class="note">PNG, no watermark. The cover exports at the size shown.</p>
+    </section>
+  </aside>
 </main>
-<script type="module" src="./src/main.js"></script>
+<script type="module" src="src/main.js"></script>
 </body>
 </html>

@@ -1,48 +1,80 @@
-// The five colour grades. Every grade names the sky, the sun, the neon lines, the
-// panel wash, the frame and the two caption inks, so every layout reads one object.
-export const GRADES = {
-  'vice-sunset': {
+// Colour grades for Neon Coast Cover Studio.
+// Each grade is a Vice City neon-sunset palette: a three-stop sky, a sun,
+// a ground colour, a neon grid colour, caption colours and a faint tint
+// laid over photos so every panel feels like one poster.
+export const GRADES = [
+  {
+    id: 'sunset',
     name: 'Vice Sunset',
-    skyTop: '#2b0f4a', skyMid: '#b0306e', skyBot: '#ff7a3d',
-    sun: '#ffd166', sunCore: '#fff3c4',
-    neon: '#ff2e88', neon2: '#00e5ff',
-    panel: '#1c0b2e', frame: '#14081f',
-    title: '#ffffff', subtitle: '#ffd166',
+    sky: ['#1b0b3b', '#e0218a', '#ff7b00'],
+    sun: '#ffd319',
+    sunRing: '#ff2975',
+    ground: '#160a2e',
+    grid: '#01cdfe',
+    title: '#ffffff',
+    subtitle: '#ffd319',
+    outline: '#1b0b3b',
+    accent: '#ff71ce',
+    tint: 'rgba(255, 123, 0, 0.12)',
   },
-  'neon-nights': {
+  {
+    id: 'neon',
     name: 'Neon Nights',
-    skyTop: '#0b1035', skyMid: '#4b1d8f', skyBot: '#ff2e88',
-    sun: '#00e5ff', sunCore: '#d6fbff',
-    neon: '#ff2e88', neon2: '#ffe14d',
-    panel: '#0e0b26', frame: '#0b1035',
-    title: '#ffffff', subtitle: '#00e5ff',
+    sky: ['#05052e', '#3b0f66', '#ff2e88'],
+    sun: '#00f0ff',
+    sunRing: '#b967ff',
+    ground: '#0a0620',
+    grid: '#ff2e88',
+    title: '#ffffff',
+    subtitle: '#00f0ff',
+    outline: '#05052e',
+    accent: '#b967ff',
+    tint: 'rgba(0, 240, 255, 0.10)',
   },
-  'palm-dusk': {
+  {
+    id: 'dusk',
     name: 'Palm Dusk',
-    skyTop: '#04263b', skyMid: '#00796b', skyBot: '#ffd166',
-    sun: '#ff9a3d', sunCore: '#fff0c2',
-    neon: '#00e5a0', neon2: '#ffd166',
-    panel: '#04263b', frame: '#031a28',
-    title: '#ffffff', subtitle: '#ffd166',
+    sky: ['#2d1b4e', '#b56576', '#e8b04b'],
+    sun: '#ffe29a',
+    sunRing: '#e8b04b',
+    ground: '#1d1233',
+    grid: '#e8b04b',
+    title: '#fff6e5',
+    subtitle: '#ffb3c1',
+    outline: '#2d1b4e',
+    accent: '#b56576',
+    tint: 'rgba(232, 176, 75, 0.10)',
   },
-  'heat-wave': {
+  {
+    id: 'heat',
     name: 'Heat Wave',
-    skyTop: '#3d0a0a', skyMid: '#a31621', skyBot: '#ff9a3d',
-    sun: '#ffe14d', sunCore: '#fffbe0',
-    neon: '#ff2e2e', neon2: '#ffb347',
-    panel: '#2a0606', frame: '#1c0404',
-    title: '#ffffff', subtitle: '#ffb347',
+    sky: ['#3d0c02', '#d7263d', '#ff6b35'],
+    sun: '#fff3b0',
+    sunRing: '#ff6b35',
+    ground: '#22060a',
+    grid: '#ff6b35',
+    title: '#ffffff',
+    subtitle: '#fff3b0',
+    outline: '#3d0c02',
+    accent: '#d7263d',
+    tint: 'rgba(255, 107, 53, 0.12)',
   },
-  'chrome-blue': {
+  {
+    id: 'chrome',
     name: 'Chrome Blue',
-    skyTop: '#0a1c3f', skyMid: '#2f6bff', skyBot: '#9fd8ff',
-    sun: '#e8f2ff', sunCore: '#ffffff',
-    neon: '#2f6bff', neon2: '#ff5e7a',
-    panel: '#0a1c3f', frame: '#06122b',
-    title: '#ffffff', subtitle: '#9fd8ff',
+    sky: ['#0b1e3a', '#1f6fb2', '#7fd4ff'],
+    sun: '#eaf6ff',
+    sunRing: '#7fd4ff',
+    ground: '#081426',
+    grid: '#7fd4ff',
+    title: '#ffffff',
+    subtitle: '#9fe8ff',
+    outline: '#0b1e3a',
+    accent: '#1f6fb2',
+    tint: 'rgba(127, 212, 255, 0.10)',
   },
-};
+];
 
-export function grade(name) {
-  return GRADES[name] ?? GRADES['vice-sunset'];
+export function gradeById(id) {
+  return GRADES.find((g) => g.id === id) || GRADES[0];
 }
