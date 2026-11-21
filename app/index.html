@@ -3,60 +3,83 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Vice Sunset Cover Studio — turn your photos into GTA-style multi-panel Vice City poster art, offline in your browser.">
-<link rel="icon" href="data:,">
-<title>Vice Sunset Cover Studio — GTA-style cover art maker</title>
+<title>Neon Coast Cover Studio</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+<header class="top">
+  <h1>Neon Coast Cover Studio</h1>
+  <p>Your photo and a caption, turned into a GTA 6 style cover poster. Everything runs offline in this page.</p>
+</header>
 <main class="app">
-  <section class="panel controls" aria-label="Cover editor">
-    <h1>Vice Sunset<br>Cover Studio</h1>
-    <p class="tag">Turn your photos into a Vice City poster. No upload, no account — everything happens in your browser.</p>
-
-    <h2>1 · Layout</h2>
-    <div class="choices" id="layoutChoices" role="group" aria-label="Layout">
-      <button type="button" data-layout="vice" class="picked">Vice Grid</button>
-      <button type="button" data-layout="nine">Nine Panel</button>
-      <button type="button" data-layout="full">Full Bleed</button>
-      <button type="button" data-layout="tilted">Tilted Snaps</button>
+  <section class="controls" aria-label="Cover controls">
+    <div class="group">
+      <h2>Photos</h2>
+      <p class="hint">Add up to three photos. Click a panel on the cover to pick it, then drag it or use the sliders.</p>
+      <div class="slot" data-slot="0">
+        <span class="slot-name">Photo 1</span>
+        <input type="file" accept="image/*" data-photo="0" aria-label="Photo 1 file">
+        <button type="button" data-sample="0" data-name="pier">Sample pier</button>
+        <button type="button" data-clear="0">Clear</button>
+      </div>
+      <div class="slot" data-slot="1">
+        <span class="slot-name">Photo 2</span>
+        <input type="file" accept="image/*" data-photo="1" aria-label="Photo 2 file">
+        <button type="button" data-sample="1" data-name="boulevard">Sample street</button>
+        <button type="button" data-clear="1">Clear</button>
+      </div>
+      <div class="slot" data-slot="2">
+        <span class="slot-name">Photo 3</span>
+        <input type="file" accept="image/*" data-photo="2" aria-label="Photo 3 file">
+        <button type="button" data-sample="2" data-name="pier">Sample pier</button>
+        <button type="button" data-clear="2">Clear</button>
+      </div>
+      <p class="hint">Empty panels show code drawn art: sun, skyline, palms, car, neon grid.</p>
     </div>
-
-    <h2>2 · Colour grade</h2>
-    <div class="choices" id="gradeChoices" role="group" aria-label="Colour grade">
-      <button type="button" data-grade="sunset" class="picked">Vice Sunset</button>
-      <button type="button" data-grade="neon">Neon Night</button>
-      <button type="button" data-grade="teal">Teal / Orange</button>
-      <button type="button" data-grade="noir">Noir</button>
-      <button type="button" data-grade="faded">Faded Film</button>
+    <div class="group">
+      <h2>Layout</h2>
+      <div class="radios" id="layouts">
+        <label><input type="radio" name="layout" value="vice-grid" checked> Vice Grid</label>
+        <label><input type="radio" name="layout" value="nine-panel"> Nine Panel</label>
+        <label><input type="radio" name="layout" value="full-bleed"> Full Bleed</label>
+        <label><input type="radio" name="layout" value="tilted-snaps"> Tilted Snaps</label>
+      </div>
     </div>
-
-    <h2>3 · Post size</h2>
-    <div class="choices" id="sizeChoices" role="group" aria-label="Export size">
-      <button type="button" data-size="1080x1080" class="picked">1080 × 1080</button>
-      <button type="button" data-size="1080x1350">1080 × 1350</button>
-      <button type="button" data-size="1920x1080">1920 × 1080</button>
+    <div class="group">
+      <h2>Grade</h2>
+      <div class="swatches" id="grades">
+        <button type="button" data-grade="vice-sunset" class="on" style="--sw1:#ff5e7a;--sw2:#ffb347">Vice Sunset</button>
+        <button type="button" data-grade="neon-nights" style="--sw1:#7b2fff;--sw2:#00e5ff">Neon Nights</button>
+        <button type="button" data-grade="palm-dusk" style="--sw1:#00b39a;--sw2:#ffd166">Palm Dusk</button>
+        <button type="button" data-grade="heat-wave" style="--sw1:#ff2e2e;--sw2:#ff9a3d">Heat Wave</button>
+        <button type="button" data-grade="chrome-blue" style="--sw1:#2f6bff;--sw2:#c8d6ff">Chrome Blue</button>
+      </div>
     </div>
-
-    <h2>4 · Caption</h2>
-    <label class="field">Headline
-      <input id="caption" type="text" maxlength="34" value="VICE SUNSET" autocomplete="off">
-    </label>
-    <label class="field">Subtitle
-      <input id="subtitle" type="text" maxlength="48" value="a vice city story" autocomplete="off">
-    </label>
-
-    <h2>5 · Your photos <span class="hint">— up to 3, each fills one panel</span></h2>
-    <div class="slots" id="slots"></div>
-    <p class="tip">Tip: click a panel to pick it, drag inside it to move your photo, scroll to zoom. “Drawn art” restores the characters.</p>
-
-    <button id="export" type="button" class="export">Export PNG</button>
-    <p id="status" role="status"></p>
+    <div class="group">
+      <h2>Words</h2>
+      <label>Title <input id="caption" type="text" maxlength="32" value="Sunset Heist"></label>
+      <label>Subtitle <input id="subtitle" type="text" maxlength="32" value="Neon Coast"></label>
+    </div>
+    <div class="group">
+      <h2>Selected panel <span id="panelName">1</span></h2>
+      <label>Zoom <input id="zoom" type="range" min="100" max="250" value="100"></label>
+      <label>Move left and right <input id="panX" type="range" min="-400" max="400" value="0"></label>
+      <label>Move up and down <input id="panY" type="range" min="-400" max="400" value="0"></label>
+      <button type="button" id="resetPan">Reset this panel</button>
+    </div>
+    <div class="group">
+      <h2>Export</h2>
+      <div class="exports">
+        <button type="button" data-export="1080x1080">PNG 1080 x 1080</button>
+        <button type="button" data-export="1080x1350">PNG 1080 x 1350</button>
+        <button type="button" data-export="1920x1080">PNG 1920 x 1080</button>
+      </div>
+      <p id="status" role="status"></p>
+    </div>
   </section>
-
-  <section class="preview" aria-label="Live preview">
-    <canvas id="cover" width="1080" height="1080" aria-label="Live preview of your cover"></canvas>
-    <p class="preview-note">Live preview — what you see is what the PNG looks like.</p>
+  <section class="stage" aria-label="Cover preview">
+    <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
+    <p class="hint">Click a panel to select it. Drag a photo panel to move the photo inside it.</p>
   </section>
 </main>
 <script type="module" src="./src/main.js"></script>

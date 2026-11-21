@@ -1,54 +1,48 @@
-// The five colour grades. A grade is a canvas filter applied to the finished
-// panels plus one or two translucent colour washes, then a vignette that
-// darkens the corners so the caption sits on a clean patch of picture.
+// The five colour grades. Every grade names the sky, the sun, the neon lines, the
+// panel wash, the frame and the two caption inks, so every layout reads one object.
+export const GRADES = {
+  'vice-sunset': {
+    name: 'Vice Sunset',
+    skyTop: '#2b0f4a', skyMid: '#b0306e', skyBot: '#ff7a3d',
+    sun: '#ffd166', sunCore: '#fff3c4',
+    neon: '#ff2e88', neon2: '#00e5ff',
+    panel: '#1c0b2e', frame: '#14081f',
+    title: '#ffffff', subtitle: '#ffd166',
+  },
+  'neon-nights': {
+    name: 'Neon Nights',
+    skyTop: '#0b1035', skyMid: '#4b1d8f', skyBot: '#ff2e88',
+    sun: '#00e5ff', sunCore: '#d6fbff',
+    neon: '#ff2e88', neon2: '#ffe14d',
+    panel: '#0e0b26', frame: '#0b1035',
+    title: '#ffffff', subtitle: '#00e5ff',
+  },
+  'palm-dusk': {
+    name: 'Palm Dusk',
+    skyTop: '#04263b', skyMid: '#00796b', skyBot: '#ffd166',
+    sun: '#ff9a3d', sunCore: '#fff0c2',
+    neon: '#00e5a0', neon2: '#ffd166',
+    panel: '#04263b', frame: '#031a28',
+    title: '#ffffff', subtitle: '#ffd166',
+  },
+  'heat-wave': {
+    name: 'Heat Wave',
+    skyTop: '#3d0a0a', skyMid: '#a31621', skyBot: '#ff9a3d',
+    sun: '#ffe14d', sunCore: '#fffbe0',
+    neon: '#ff2e2e', neon2: '#ffb347',
+    panel: '#2a0606', frame: '#1c0404',
+    title: '#ffffff', subtitle: '#ffb347',
+  },
+  'chrome-blue': {
+    name: 'Chrome Blue',
+    skyTop: '#0a1c3f', skyMid: '#2f6bff', skyBot: '#9fd8ff',
+    sun: '#e8f2ff', sunCore: '#ffffff',
+    neon: '#2f6bff', neon2: '#ff5e7a',
+    panel: '#0a1c3f', frame: '#06122b',
+    title: '#ffffff', subtitle: '#9fd8ff',
+  },
+};
 
-export const GRADES = [
-  { id: 'sunset', name: 'Vice Sunset' },
-  { id: 'neon', name: 'Neon Night' },
-  { id: 'teal', name: 'Teal / Orange' },
-  { id: 'noir', name: 'Noir' },
-  { id: 'faded', name: 'Faded Film' },
-];
-
-export function gradeFilter(id) {
-  switch (id) {
-    case 'neon': return 'saturate(1.4) contrast(1.08) brightness(0.96)';
-    case 'teal': return 'saturate(1.25) contrast(1.1)';
-    case 'noir': return 'grayscale(1) contrast(1.18) brightness(1.04)';
-    case 'faded': return 'saturate(0.72) contrast(0.92) brightness(1.07)';
-    default: return 'saturate(1.12) contrast(1.03)'; // sunset
-  }
-}
-
-function wash(ctx, w, h, stops) {
-  const g = ctx.createLinearGradient(0, 0, 0, h);
-  for (const [at, colour] of stops) g.addColorStop(at, colour);
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, w, h);
-}
-
-/** Paints the grade's colour washes and vignette over a finished cover. */
-export function gradeWash(ctx, w, h, id) {
-  ctx.save();
-  if (id === 'neon') {
-    wash(ctx, w, h, [[0, 'rgba(80, 20, 180, 0.28)'], [0.6, 'rgba(20, 10, 60, 0.10)'], [1, 'rgba(255, 40, 140, 0.22)']]);
-  } else if (id === 'teal') {
-    wash(ctx, w, h, [[0, 'rgba(0, 140, 150, 0.20)'], [0.55, 'rgba(0, 0, 0, 0)'], [1, 'rgba(255, 130, 40, 0.20)']]);
-  } else if (id === 'noir') {
-    wash(ctx, w, h, [[0, 'rgba(255, 255, 255, 0.05)'], [1, 'rgba(0, 0, 0, 0.14)']]);
-  } else if (id === 'faded') {
-    wash(ctx, w, h, [[0, 'rgba(255, 220, 170, 0.16)'], [1, 'rgba(255, 200, 140, 0.10)']]);
-  } else { // sunset
-    wash(ctx, w, h, [[0, 'rgba(255, 120, 60, 0.10)'], [0.7, 'rgba(255, 60, 120, 0.06)'], [1, 'rgba(160, 20, 90, 0.16)']]);
-  }
-  // vignette: soft dark corners, clear middle
-  const v = ctx.createRadialGradient(
-    w / 2, h / 2, Math.min(w, h) * 0.42,
-    w / 2, h / 2, Math.max(w, h) * 0.78,
-  );
-  v.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  v.addColorStop(1, 'rgba(10, 2, 16, 0.42)');
-  ctx.fillStyle = v;
-  ctx.fillRect(0, 0, w, h);
-  ctx.restore();
+export function grade(name) {
+  return GRADES[name] ?? GRADES['vice-sunset'];
 }
